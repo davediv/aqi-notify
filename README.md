@@ -43,7 +43,7 @@ may experience more serious effects. Consider wearing a mask outdoors.
 ### 1. Clone and Install
 
 ```bash
-git clone https://github.com/yourusername/aqi-notify.git
+git clone https://github.com/davediv/aqi-notify.git
 cd aqi-notify
 npm install
 ```
