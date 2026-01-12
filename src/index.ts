@@ -234,8 +234,10 @@ interface MessageOptions {
 function formatMessage(data: AQIData, options: MessageOptions): string {
 	const level = getAQILevel(data.aqi);
 	const weatherInfo = formatWeather(data.weather);
+	const divider = '━━━━━━━━━━━━━';
 
 	const parts = [
+		divider,
 		`${options.titleEmoji} <b>${options.title}</b>`,
 		'',
 		`<b>${options.aqiLabel}: ${data.aqi}</b> - ${level.level} ${level.emoji}`,
@@ -255,7 +257,7 @@ function formatMessage(data: AQIData, options: MessageOptions): string {
 		parts.push('', options.footer);
 	}
 
-	parts.push('', `⏰ ${data.time}`);
+	parts.push('', `⏰ ${data.time}`, divider);
 
 	return parts.join('\n');
 }
