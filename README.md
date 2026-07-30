@@ -1,42 +1,47 @@
 # AQI Notify
 
-A Cloudflare Worker that monitors Air Quality Index (AQI) and sends notifications via Telegram. Get hourly alerts when air quality becomes unhealthy and daily summaries to start your day informed.
+A Cloudflare Worker that monitors Air Quality Index (AQI) in Bangkok, Bandung, Jakarta, and Pare (Kediri), then sends a single polished report to Telegram.
 
 ## Features
 
-- **Hourly Threshold Alerts** - Get notified when AQI exceeds 100 (Unhealthy for Sensitive Groups)
-- **Daily Summary** - Receive a morning report at 8:00 AM (configurable timezone)
-- **Full Health Advisory** - AQI level, pollutant breakdown (PM2.5, PM10, O₃, etc.), weather conditions, and health recommendations
+- **Four Locations** - Bangkok, Bandung, Jakarta, and Pare (Kediri)
+- **Hourly Threshold Alerts** - One report containing only locations whose US AQI exceeds 100
+- **Daily Summary** - One report for all locations at 8:00 AM GMT+7
+- **Useful at a Glance** - AQI level, dominant pollutant, pollutant concentrations, weather, and guidance
 - **Zero Cost** - Runs on Cloudflare Workers free tier
-- **Easy to Customize** - Change city, threshold, or notification times
+- **Easy to Customize** - Change locations, threshold, or notification times
 
 ## Sample Notification
 
 ```
-⚠️ Bangkok Air Quality Alert
+🌏 Daily Air Quality Summary
+Bangkok · Bandung · Jakarta · Pare (Kediri)
 
-AQI: 156 - Unhealthy 🔴
+🟡 Bangkok · AQI 55
+Moderate · Main: PM2.5
+PM2.5 7.6 · PM10 10.7 · O₃ 91 µg/m³
+NO₂ 9 · SO₂ 5.3 · CO 543 µg/m³
+🌡️ 30.8°C · 💧 71% · 💨 2.3 m/s
 
-📊 Pollutants:
-• PM2.5: 89
-• PM10: 45
-• O₃: 32
+🔴 Bandung · AQI 178
+Unhealthy · Main: PM2.5
+PM2.5 51.3 · PM10 53 · O₃ 227 µg/m³
+NO₂ 8.5 · SO₂ 27.3 · CO 768 µg/m³
+🌡️ 29.3°C · 💧 46% · 💨 2 m/s
 
-🏥 Health Advisory:
-Everyone may begin to experience health effects. Sensitive groups
-may experience more serious effects. Consider wearing a mask outdoors.
+🏥 Guidance — Bandung:
+Everyone should reduce prolonged outdoor activity. Sensitive groups
+should avoid it where possible.
 
-🌡️ 28°C | 65% humidity | Wind: 2 m/s
-
-⏰ 2024-01-15 14:00:00
+🕒 Updated 2026-07-30 14:00 GMT+7
+Data: Open-Meteo
 ```
 
 ## Prerequisites
 
 1. [Node.js](https://nodejs.org/) (v18+)
 2. [Cloudflare account](https://dash.cloudflare.com/sign-up) (free)
-3. [AQICN API token](https://aqicn.org/data-platform/token/) (free)
-4. Telegram bot token (create via [@BotFather](https://t.me/botfather))
+3. Telegram bot token (create via [@BotFather](https://t.me/botfather))
 
 ## Quick Start
 
@@ -48,11 +53,7 @@ cd aqi-notify
 npm install
 ```
 
-### 2. Get Your API Tokens
-
-**AQICN Token:**
-1. Go to https://aqicn.org/data-platform/token/
-2. Enter your email and get a free token
+### 2. Set Up Telegram
 
 **Telegram Bot:**
 1. Message [@BotFather](https://t.me/botfather) on Telegram
@@ -77,7 +78,6 @@ cp .dev.vars.example .dev.vars
 
 Edit `.dev.vars`:
 ```
-AQICN_TOKEN=your_aqicn_token
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token
 TELEGRAM_CHAT_ID=your_chat_id
 TELEGRAM_THREAD_ID=optional_thread_id
@@ -108,7 +108,6 @@ curl http://localhost:8787/test-summary
 npx wrangler login
 
 # Add secrets
-npx wrangler secret put AQICN_TOKEN
 npx wrangler secret put TELEGRAM_BOT_TOKEN
 npx wrangler secret put TELEGRAM_CHAT_ID
 npx wrangler secret put TELEGRAM_THREAD_ID  # optional
@@ -119,19 +118,22 @@ npm run deploy
 
 ## Configuration
 
-### Change City
+### Change Locations
 
-Edit `src/index.ts` and update the `CONFIG` object:
+Edit `src/index.ts` and update `CONFIG.LOCATIONS` using the desired coordinates:
 
 ```typescript
 const CONFIG = {
-  ALERT_THRESHOLD: 100,
-  CITY: 'shanghai',  // Change to your city
-  // ...
+  LOCATIONS: [
+    {
+      name: 'Bandung',
+      country: 'Indonesia',
+      latitude: -6.92222,
+      longitude: 107.60694,
+    },
+  ],
 }
 ```
-
-Find your city name at https://aqicn.org/city/all/
 
 ### Change Alert Threshold
 
@@ -181,7 +183,7 @@ And update `CONFIG.CRON` in `src/index.ts` to match.
 | Endpoint | Description |
 |----------|-------------|
 | `GET /` | Shows usage information |
-| `GET /check` | Returns current AQI data as JSON |
+| `GET /check` | Returns current AQI and weather data for all locations as JSON |
 | `GET /test-alert` | Sends a test alert notification |
 | `GET /test-summary` | Sends a test daily summary |
 
@@ -189,8 +191,8 @@ And update `CONFIG.CRON` in `src/index.ts` to match.
 
 | Cron | Description |
 |------|-------------|
-| `0 * * * *` | Hourly AQI check, alerts if above threshold |
-| `0 1 * * *` | Daily summary at 8:00 AM Bangkok time |
+| `0 * * * *` | Hourly check, with one alert for locations above the threshold |
+| `0 1 * * *` | Daily summary at 8:00 AM GMT+7 |
 
 ## Development
 
@@ -210,9 +212,9 @@ npm run deploy
 
 ## Troubleshooting
 
-**"Invalid AQI value received: -1"**
-- The AQICN API returns -1 when data is unavailable for the city
-- Try a different city or check https://aqicn.org for available stations
+**"Open-Meteo returned incomplete data"**
+- Check the Open-Meteo service status and Worker logs
+- Confirm every configured latitude and longitude is valid
 
 **Telegram message not received**
 - Verify your bot token and chat ID
@@ -229,5 +231,5 @@ MIT
 
 ## Acknowledgments
 
-- Air quality data from [World Air Quality Index Project](https://aqicn.org/)
+- Air quality and weather data from [Open-Meteo](https://open-meteo.com/)
 - Powered by [Cloudflare Workers](https://workers.cloudflare.com/)

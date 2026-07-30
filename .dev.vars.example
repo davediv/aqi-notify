@@ -1,9 +1,6 @@
 # Copy this file to .dev.vars and fill in your values
 # .dev.vars is gitignored and used for local development
 
-# Get your token from: https://aqicn.org/data-platform/token/
-AQICN_TOKEN=your_aqicn_token_here
-
 # Create a bot via @BotFather on Telegram
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
 
