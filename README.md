@@ -1,10 +1,10 @@
 # AQI Notify
 
-A Cloudflare Worker that monitors Air Quality Index (AQI) in Bangkok, Bandung, Jakarta, and Pare (Kediri), then sends a single polished report to Telegram.
+A Cloudflare Worker that monitors Air Quality Index (AQI) in Bangkok, Bandung, Jakarta, Pare (Kediri), Bintan, and President University (Cikarang), then sends a single polished report to Telegram.
 
 ## Features
 
-- **Four Locations** - Bangkok, Bandung, Jakarta, and Pare (Kediri)
+- **Six Locations** - Bangkok, Bandung, Jakarta, Pare (Kediri), Bintan, and President University (Cikarang)
 - **Hourly Threshold Alerts** - One report containing only locations whose US AQI exceeds 100
 - **Daily Summary** - One report for all locations at 8:00 AM GMT+7
 - **Useful at a Glance** - AQI level, dominant pollutant, pollutant concentrations, weather, and guidance
@@ -15,7 +15,7 @@ A Cloudflare Worker that monitors Air Quality Index (AQI) in Bangkok, Bandung, J
 
 ```
 🌏 Daily Air Quality Summary
-Bangkok · Bandung · Jakarta · Pare (Kediri)
+Bangkok · Bandung · Jakarta · Pare (Kediri) · Bintan · President University (Cikarang)
 
 🟡 Bangkok · AQI 55
 Moderate · Main: PM2.5

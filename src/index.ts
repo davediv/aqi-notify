@@ -2,7 +2,8 @@
  * AQI Notify - Multi-city Air Quality Monitor
  *
  * A Cloudflare Worker that monitors air quality in Bangkok, Bandung,
- * Jakarta, and Pare (Kediri), then sends notifications via Telegram.
+ * Jakarta, Pare (Kediri), Bintan, and President University (Cikarang),
+ * then sends notifications via Telegram.
  *
  * Air quality and weather data: https://open-meteo.com/
  */
@@ -14,6 +15,8 @@ const CONFIG = {
 		{ name: 'Bandung', country: 'Indonesia', latitude: -6.92222, longitude: 107.60694 },
 		{ name: 'Jakarta', country: 'Indonesia', latitude: -6.21462, longitude: 106.84513 },
 		{ name: 'Pare (Kediri)', country: 'Indonesia', latitude: -7.7679, longitude: 112.198 },
+		{ name: 'Bintan', country: 'Indonesia', latitude: 1.07667, longitude: 104.50028 },
+		{ name: 'President University (Cikarang)', country: 'Indonesia', latitude: -6.285, longitude: 107.17056 },
 	],
 	CRON: {
 		HOURLY: '0 * * * *',
@@ -329,7 +332,7 @@ function formatDailySummary(data: AQIData[]): string {
 	return formatMessage(data, {
 		title: 'Daily Air Quality Summary',
 		titleEmoji: '🌏',
-		subtitle: 'Bangkok · Bandung · Jakarta · Pare (Kediri)',
+		subtitle: CONFIG.LOCATIONS.map(({ name }) => name).join(' · '),
 		footer: 'Take care and have a good day! 🌅',
 	});
 }
@@ -388,10 +391,7 @@ export default {
 			`AQI Notify - Multi-city Air Quality Monitor
 
 Locations:
-- Bangkok
-- Bandung
-- Jakarta
-- Pare (Kediri)
+${CONFIG.LOCATIONS.map(({ name }) => `- ${name}`).join('\n')}
 
 Endpoints:
 - /check - Get current data for all locations (JSON)
